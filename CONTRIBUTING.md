@@ -2,20 +2,20 @@
 
 Thank you for considering contributing! Here's how to get started.
 
-## 🐛 Reporting Bugs
+## Reporting Bugs
 
 - Use the **Issues** tab on GitHub
 - Include your browser name + version
 - Describe what you expected vs. what happened
 - Include a screenshot if relevant
 
-## 💡 Suggesting Features
+## Suggesting Features
 
 Open an issue with the tag `enhancement` and describe:
 - What problem the feature solves
 - How you'd expect it to work
 
-## 🔧 Pull Requests
+## Pull Requests
 
 1. **Fork** the repository
 2. **Create a branch** from `main`:
@@ -33,7 +33,7 @@ Open an issue with the tag `enhancement` and describe:
 - Add comments for non-obvious logic
 - Prefer vanilla JS — no framework dependencies
 
-## 🏷️ Commit Message Format
+## Commit Message Format
 
 ```
 type: short description
@@ -45,7 +45,7 @@ docs: update README with deployment steps
 style: improve dark mode contrast ratios
 ```
 
-## ⚕️ Medical Content
+## Medical Content
 
 Any medical content changes (accuracy claims, dataset stats, clinical language) must:
 - Cite a credible source in the PR description
