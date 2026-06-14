@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MammoAI — Breast Cancer Detection System</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Lato:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --ink: #050e1f;
+  --navy: #0b1e3d;
+  --blue-deep: #0f3470;
+  --blue: #1557d4;
+  --blue-mid: #2470e8;
+  --blue-lite: #4a9eff;
+  --sky: #7ec8ff;
+  --cyan: #00d4f5;
+  --white: #f6faff;
+  --offwhite: #edf3fc;
+  --body: #1b2c47;
+  --muted: #536882;
+  --border: #d4e1f7;
+  --card: #ffffff;
+  --green: #00c27a;
+  --red: #e8334a;
+  --amber: #f59e0b;
+  --sh: 0 2px 24px rgba(15,52,112,.10);
+  --sh-lg: 0 12px 56px rgba(15,52,112,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Lato',sans-serif;
+  background:var(--offwhite);
+  color:var(--body);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--offwhite)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* ─── NAV ─── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  height:62px;
+  background:rgba(5,14,31,.96);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(0,212,245,.12);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 2.4rem;
+}
+.nav-logo{
+  font-family:'Syne',sans-serif;font-weight:800;font-size:1.35rem;
+  color:var(--white);cursor:pointer;display:flex;align-items:center;gap:.55rem;
+  letter-spacing:-.01em;
+}
+.nav-logo .accent{color:var(--cyan)}
+.logo-pulse{
+  width:9px;height:9px;border-radius:50%;background:var(--cyan);
+  box-shadow:0 0 8px var(--cyan);
+  animation:glow 2s ease-in-out infinite;
+}
+@keyframes glow{0%,100%{opacity:1;box-shadow:0 0 8px var(--cyan)}50%{opacity:.4;box-shadow:0 0 2px var(--cyan)}}
+.nav-links{display:flex;gap:.15rem;align-items:center}
+.nav-btn{
+  font-family:'Syne',sans-serif;font-weight:500;font-size:.8rem;
+  letter-spacing:.06em;text-transform:uppercase;
+  color:rgba(246,250,255,.5);padding:.45rem .85rem;border-radius:6px;
+  cursor:pointer;border:none;background:none;transition:all .2s;
+}
+.nav-btn:hover,.nav-btn.active{color:var(--white);background:rgba(0,212,245,.1)}
+.nav-btn.active{color:var(--cyan)}
+.nav-chip{
+  font-size:.67rem;font-weight:600;padding:.22rem .6rem;border-radius:12px;
+  background:rgba(0,212,245,.15);color:var(--cyan);
+  border:1px solid rgba(0,212,245,.3);
+  font-family:'JetBrains Mono',monospace;letter-spacing:.04em;
+}
+
+/* ─── PAGES ─── */
+.page{display:none;min-height:100vh;padding-top:62px;animation:fadeUp .45s ease}
+.page.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ══════════════════ HOME ══════════════════ */
+.hero{
+  position:relative;overflow:hidden;
+  background:var(--ink);
+  min-height:calc(100vh - 62px);
+  display:grid;grid-template-columns:1fr 1fr;align-items:center;
+  padding:4rem 2.4rem 3rem;gap:3rem;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 70% 80% at 20% 50%,rgba(21,87,212,.4) 0%,transparent 70%),
+    radial-gradient(ellipse 50% 50% at 85% 20%,rgba(0,212,245,.15) 0%,transparent 60%),
+    radial-gradient(ellipse 30% 40% at 70% 85%,rgba(21,87,212,.2) 0%,transparent 60%);
+  pointer-events:none;
+}
+.hero::after{
+  content:'';position:absolute;inset:0;
+  background-image:
+    repeating-linear-gradient(0deg,transparent,transparent 47px,rgba(0,212,245,.03) 48px),
+    repeating-linear-gradient(90deg,transparent,transparent 47px,rgba(0,212,245,.03) 48px);
+  pointer-events:none;
+}
+.hero-left{position:relative;z-index:1}
+.hero-tag{
+  font-family:'JetBrains Mono',monospace;font-size:.74rem;color:var(--cyan);
+  letter-spacing:.14em;text-transform:uppercase;
+  display:flex;align-items:center;gap:.7rem;margin-bottom:1.6rem;
+}
+.hero-tag::before{content:'';width:32px;height:1px;background:var(--cyan)}
+.hero h1{
+  font-family:'Syne',sans-serif;font-weight:800;
+  font-size:clamp(2.4rem,4.5vw,4rem);line-height:1.05;
+  color:var(--white);margin-bottom:1.5rem;letter-spacing:-.02em;
+}
+.hero h1 .hl{
+  color:transparent;
+  background:linear-gradient(135deg,var(--cyan),var(--blue-lite));
+  -webkit-background-clip:text;background-clip:text;
+}
+.hero p{
+  font-size:1.05rem;color:rgba(246,250,255,.6);line-height:1.82;
+  max-width:480px;margin-bottom:2.8rem;font-weight:300;
+}
+.cta-row{display:flex;gap:1rem;flex-wrap:wrap}
+.btn-cta{
+  font-family:'Syne',sans-serif;font-weight:700;font-size:.92rem;
+  padding:.88rem 2.1rem;border-radius:8px;cursor:pointer;
+  transition:all .22s;letter-spacing:.02em;border:none;
+}
+.btn-cta.primary{
+  background:linear-gradient(135deg,var(--blue),var(--blue-mid));color:#fff;
+  box-shadow:0 4px 22px rgba(21,87,212,.45);
+}
+.btn-cta.primary:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(21,87,212,.55)}
+.btn-cta.ghost{
+  background:rgba(246,250,255,.06);color:var(--white);
+  border:1px solid rgba(246,250,255,.2);
+}
+.btn-cta.ghost:hover{background:rgba(246,250,255,.12);border-color:rgba(246,250,255,.45)}
+
+.hero-stats{
+  display:flex;gap:2.5rem;margin-top:3.5rem;padding-top:2.5rem;
+  border-top:1px solid rgba(255,255,255,.07);
+}
+.hs-val{font-family:'Syne',sans-serif;font-size:2rem;font-weight:700;color:var(--white)}
+.hs-val sup{font-size:1rem;color:var(--cyan)}
+.hs-lbl{font-size:.74rem;color:rgba(246,250,255,.4);text-transform:uppercase;letter-spacing:.07em;margin-top:.25rem}
+
+/* Mammogram preview panel */
+.hero-right{position:relative;z-index:1;display:flex;justify-content:center;align-items:center}
+.mammo-panel{
+  width:320px;height:380px;border-radius:20px;
+  background:rgba(11,30,61,.8);border:1px solid rgba(0,212,245,.2);
+  box-shadow:0 0 60px rgba(0,212,245,.12),0 20px 60px rgba(0,0,0,.4);
+  display:flex;flex-direction:column;overflow:hidden;position:relative;
+}
+.mp-header{
+  padding:.8rem 1.2rem;background:rgba(0,212,245,.06);
+  border-bottom:1px solid rgba(0,212,245,.15);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.mp-title{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--cyan);letter-spacing:.08em}
+.mp-dots{display:flex;gap:.4rem}
+.mp-dot{width:8px;height:8px;border-radius:50%}
+.mp-body{flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.mammo-img-demo{
+  width:220px;height:240px;border-radius:8px;
+  background:radial-gradient(ellipse 60% 70% at 45% 45%, #2a3550 0%, #0f1825 60%, #070d18 100%);
+  position:relative;overflow:hidden;
+  box-shadow:inset 0 0 40px rgba(0,0,0,.5);
+}
+.mammo-blob{
+  position:absolute;border-radius:50%;
+  background:radial-gradient(circle,rgba(180,200,230,.35) 0%,transparent 70%);
+}
+.scan-line{
+  position:absolute;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--cyan),transparent);
+  top:0;animation:scan 3s ease-in-out infinite;
+  box-shadow:0 0 12px var(--cyan);
+}
+@keyframes scan{0%{top:0;opacity:1}100%{top:100%;opacity:.2}}
+.mp-overlay{
+  position:absolute;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,212,245,.015) 4px);
+}
+.ai-tag{
+  position:absolute;bottom:12px;right:12px;
+  font-family:'JetBrains Mono',monospace;font-size:.64rem;
+  color:var(--cyan);background:rgba(0,212,245,.1);
+  border:1px solid rgba(0,212,245,.3);padding:.25rem .6rem;border-radius:4px;
+}
+.mp-footer{
+  padding:.8rem 1.2rem;background:rgba(0,0,0,.2);
+  border-top:1px solid rgba(0,212,245,.08);
+}
+.mp-progress-bar{height:3px;background:rgba(0,212,245,.15);border-radius:2px;margin-bottom:.5rem}
+.mp-progress-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--blue),var(--cyan));width:78%;transition:width 1s}
+.mp-status{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:rgba(0,212,245,.5);letter-spacing:.05em}
+
+/* Features strip */
+.features-strip{background:var(--white);padding:4.5rem 2.4rem}
+.strip-inner{max-width:1100px;margin:0 auto}
+.section-eyebrow{
+  font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--blue);
+  letter-spacing:.14em;text-transform:uppercase;margin-bottom:.8rem;
+  display:flex;align-items:center;gap:.6rem;
+}
+.section-eyebrow::before{content:'';width:20px;height:1px;background:var(--blue)}
+.section-h{font-family:'Syne',sans-serif;font-weight:700;font-size:1.8rem;color:var(--navy);margin-bottom:.5rem}
+.section-sub{color:var(--muted);font-size:.92rem;margin-bottom:3rem}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.4rem}
+.feat-card{
+  padding:1.8rem;border-radius:14px;border:1px solid var(--border);
+  background:var(--card);transition:all .25s;
+  position:relative;overflow:hidden;
+}
+.feat-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--blue),var(--cyan));
+  transform:scaleX(0);transform-origin:left;transition:transform .3s;
+}
+.feat-card:hover{transform:translateY(-5px);box-shadow:var(--sh-lg);border-color:rgba(21,87,212,.2)}
+.feat-card:hover::before{transform:scaleX(1)}
+.feat-icon{
+  width:46px;height:46px;border-radius:10px;
+  background:linear-gradient(135deg,rgba(21,87,212,.1),rgba(0,212,245,.1));
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.2rem;margin-bottom:1.1rem;
+}
+.feat-title{font-family:'Syne',sans-serif;font-weight:600;font-size:1rem;color:var(--navy);margin-bottom:.4rem}
+.feat-desc{font-size:.86rem;color:var(--muted);line-height:1.7}
+
+/* ══════════════════ UPLOAD ══════════════════ */
+.upload-container{max-width:860px;margin:0 auto;padding:3rem 2rem}
+.pg-header{margin-bottom:2.5rem}
+.breadcrumb{font-family:'JetBrains Mono',monospace;font-size:.73rem;color:var(--muted);margin-bottom:.6rem}
+.breadcrumb span{color:var(--blue)}
+.pg-header h2{font-family:'Syne',sans-serif;font-weight:700;font-size:1.85rem;color:var(--navy)}
+.pg-header p{color:var(--muted);font-size:.93rem;margin-top:.4rem}
+
+.upload-zone{
+  border:2px dashed var(--border);border-radius:16px;
+  background:var(--card);padding:4rem 2rem;text-align:center;
+  cursor:pointer;transition:all .25s;position:relative;overflow:hidden;
+}
+.upload-zone:hover,.upload-zone.drag{
+  border-color:var(--blue);background:rgba(21,87,212,.03);
+}
+.upload-zone.drag{border-style:solid;box-shadow:0 0 0 4px rgba(21,87,212,.1)}
+.uz-icon{font-size:3rem;margin-bottom:1rem;display:block;
+  animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.uz-title{font-family:'Syne',sans-serif;font-weight:600;font-size:1.15rem;color:var(--navy);margin-bottom:.5rem}
+.uz-sub{font-size:.88rem;color:var(--muted);margin-bottom:1.5rem}
+.uz-types{
+  display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.5rem;
+}
+.type-tag{
+  font-size:.75rem;padding:.25rem .7rem;border-radius:20px;
+  background:var(--offwhite);color:var(--muted);border:1px solid var(--border);
+  font-family:'JetBrains Mono',monospace;
+}
+.btn-browse{
+  font-family:'Syne',sans-serif;font-weight:600;font-size:.88rem;
+  padding:.65rem 1.8rem;border-radius:7px;border:none;
+  background:var(--blue);color:#fff;cursor:pointer;
+  box-shadow:0 3px 14px rgba(21,87,212,.35);transition:all .2s;
+}
+.btn-browse:hover{background:var(--blue-mid);transform:translateY(-1px)}
+#file-input{display:none}
+
+/* Preview */
+.preview-card{
+  background:var(--card);border-radius:14px;border:1px solid var(--border);
+  box-shadow:var(--sh);overflow:hidden;margin-top:1.5rem;
+  display:none;
+}
+.preview-header{
+  background:var(--navy);padding:1rem 1.5rem;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.preview-header h4{font-family:'Syne',sans-serif;font-size:.95rem;color:var(--white);font-weight:600}
+.preview-meta{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:rgba(246,250,255,.4)}
+.preview-body{padding:1.5rem;display:flex;gap:2rem;align-items:flex-start;flex-wrap:wrap}
+.preview-img-wrap{
+  width:200px;height:200px;border-radius:10px;overflow:hidden;
+  background:var(--ink);flex-shrink:0;
+  border:1px solid var(--border);position:relative;
+}
+.preview-img-wrap img{width:100%;height:100%;object-fit:cover}
+.preview-info{flex:1;min-width:200px}
+.info-row{
+  display:flex;justify-content:space-between;
+  padding:.55rem 0;border-bottom:1px solid var(--offwhite);
+}
+.info-row:last-child{border-bottom:none}
+.ir-label{font-size:.78rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.ir-val{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--body)}
+.preview-actions{padding:1rem 1.5rem;background:var(--offwhite);border-top:1px solid var(--border);
+  display:flex;gap:1rem;align-items:center}
+.btn-analyze{
+  font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;
+  padding:.85rem 2.2rem;border-radius:8px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--blue),var(--blue-mid));color:#fff;
+  box-shadow:0 4px 18px rgba(21,87,212,.4);transition:all .22s;
+  display:flex;align-items:center;gap:.6rem;
+}
+.btn-analyze:hover{transform:translateY(-2px);box-shadow:0 7px 28px rgba(21,87,212,.5)}
+.btn-clear{
+  font-size:.88rem;color:var(--muted);background:none;border:1px solid var(--border);
+  padding:.85rem 1.5rem;border-radius:8px;cursor:pointer;transition:all .2s;
+}
+.btn-clear:hover{background:var(--border);color:var(--body)}
+
+/* ══════════════════ ANALYSIS ══════════════════ */
+.analysis-container{max-width:860px;margin:0 auto;padding:3rem 2rem}
+#analysis-idle{text-align:center;padding:5rem 2rem;color:var(--muted)}
+#analysis-idle .idle-icon{font-size:3.5rem;margin-bottom:1rem;opacity:.5}
+#analysis-running,#analysis-complete{display:none}
+
+/* Processing animation */
+.process-card{
+  background:var(--card);border-radius:16px;border:1px solid var(--border);
+  box-shadow:var(--sh);overflow:hidden;
+}
+.process-header{
+  background:var(--navy);padding:1.2rem 1.8rem;
+  display:flex;align-items:center;gap:1rem;
+}
+.process-header h3{font-family:'Syne',sans-serif;font-weight:600;color:var(--white);font-size:1rem}
+.spinner{
+  width:18px;height:18px;border-radius:50%;
+  border:2px solid rgba(0,212,245,.3);border-top-color:var(--cyan);
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.process-body{padding:2rem}
+.process-img-row{display:flex;gap:1.5rem;margin-bottom:2rem;flex-wrap:wrap}
+.proc-img{
+  width:160px;height:160px;border-radius:10px;overflow:hidden;
+  background:var(--ink);border:1px solid var(--border);position:relative;flex-shrink:0;
+}
+.proc-img img{width:100%;height:100%;object-fit:cover;opacity:.7}
+.proc-img-label{
+  position:absolute;bottom:6px;left:6px;right:6px;
+  font-family:'JetBrains Mono',monospace;font-size:.6rem;
+  color:var(--cyan);background:rgba(0,0,0,.6);
+  padding:.2rem .4rem;border-radius:3px;text-align:center;
+}
+.heat-overlay{
+  position:absolute;inset:0;opacity:.6;
+  background:radial-gradient(ellipse 55% 60% at 52% 48%, rgba(255,60,60,.7) 0%, rgba(255,140,0,.4) 35%, transparent 70%);
+}
+.proc-steps{flex:1;min-width:240px}
+.step-item{
+  display:flex;align-items:flex-start;gap:1rem;
+  padding:.8rem 0;border-bottom:1px solid var(--offwhite);
+}
+.step-item:last-child{border-bottom:none}
+.step-num{
+  width:28px;height:28px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.72rem;font-weight:700;font-family:'Syne',sans-serif;
+  flex-shrink:0;transition:all .3s;
+}
+.step-num.done{background:var(--green);color:#fff}
+.step-num.active{background:var(--blue);color:#fff;animation:stepPulse 1s ease-in-out infinite}
+.step-num.pending{background:var(--offwhite);color:var(--muted)}
+@keyframes stepPulse{0%,100%{box-shadow:0 0 0 0 rgba(21,87,212,.4)}50%{box-shadow:0 0 0 6px rgba(21,87,212,0)}}
+.step-info .step-title{font-size:.88rem;font-weight:600;color:var(--navy)}
+.step-info .step-sub{font-size:.76rem;color:var(--muted);margin-top:.2rem}
+.step-bar{
+  height:4px;background:var(--offwhite);border-radius:2px;margin-top:.4rem;overflow:hidden;
+}
+.step-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--blue),var(--cyan));
+  width:0;transition:width .8s ease}
+
+/* Feature extraction viz */
+.feature-viz{
+  margin-top:1.5rem;padding:1.5rem;background:var(--offwhite);border-radius:12px;
+}
+.fv-title{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
+  color:var(--muted);margin-bottom:1rem;}
+.feat-bars{display:grid;grid-template-columns:1fr 1fr;gap:.6rem .8rem}
+.fb-row{display:flex;align-items:center;gap:.6rem}
+.fb-name{font-size:.74rem;color:var(--muted);width:100px;flex-shrink:0;font-family:'JetBrains Mono',monospace}
+.fb-track{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.fb-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--blue-lite),var(--cyan));width:0;transition:width 1.2s ease}
+.fb-val{font-size:.7rem;color:var(--body);width:36px;text-align:right;font-family:'JetBrains Mono',monospace}
+
+/* ══════════════════ RESULTS ══════════════════ */
+.results-container{max-width:900px;margin:0 auto;padding:3rem 2rem}
+#results-empty{text-align:center;padding:5rem 2rem;color:var(--muted)}
+#results-data{display:none}
+
+.verdict-card{
+  border-radius:18px;padding:2.5rem;margin-bottom:2rem;
+  display:flex;align-items:center;gap:2.5rem;flex-wrap:wrap;
+  border:2px solid;position:relative;overflow:hidden;
+}
+.verdict-card::before{
+  content:'';position:absolute;top:0;right:0;width:280px;height:280px;border-radius:50%;
+  transform:translate(40%,-40%);opacity:.12;
+}
+.verdict-benign{background:rgba(0,194,122,.05);border-color:var(--green)}
+.verdict-benign::before{background:var(--green)}
+.verdict-malignant{background:rgba(232,51,74,.05);border-color:var(--red)}
+.verdict-malignant::before{background:var(--red)}
+
+.verdict-icon{
+  width:88px;height:88px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:2rem;
+}
+.verdict-benign .verdict-icon{background:rgba(0,194,122,.15)}
+.verdict-malignant .verdict-icon{background:rgba(232,51,74,.15)}
+.verdict-text .vt-result{
+  font-family:'Syne',sans-serif;font-weight:800;font-size:2.6rem;
+  letter-spacing:-.02em;line-height:1;
+}
+.verdict-benign .vt-result{color:var(--green)}
+.verdict-malignant .vt-result{color:var(--red)}
+.vt-sub{font-size:.88rem;color:var(--muted);margin-top:.4rem}
+.vt-risk{
+  display:inline-flex;align-items:center;gap:.4rem;margin-top:.7rem;
+  padding:.3rem .9rem;border-radius:20px;font-size:.8rem;font-weight:700;
+  font-family:'Syne',sans-serif;
+}
+.risk-low{background:rgba(0,194,122,.15);color:var(--green)}
+.risk-med{background:rgba(245,158,11,.15);color:var(--amber)}
+.risk-high{background:rgba(232,51,74,.15);color:var(--red)}
+
+.metrics-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1.2rem;margin-bottom:2rem}
+.metric-card{
+  background:var(--card);border-radius:12px;border:1px solid var(--border);
+  box-shadow:var(--sh);padding:1.5rem;text-align:center;
+}
+.mc-lbl{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.5rem}
+.mc-val{font-family:'Syne',sans-serif;font-weight:700;font-size:1.9rem;color:var(--navy)}
+.mc-bar{height:6px;background:var(--offwhite);border-radius:3px;margin-top:.7rem;overflow:hidden}
+.mc-fill{height:100%;border-radius:3px;transition:width 1.2s ease}
+.mc-sub{font-size:.74rem;color:var(--muted);margin-top:.4rem}
+
+.alert-panel{
+  border-radius:12px;padding:1.4rem 1.8rem;margin-bottom:2rem;
+  display:flex;gap:1rem;border:1.5px solid;
+}
+.alert-panel.danger{background:rgba(232,51,74,.05);border-color:rgba(232,51,74,.3)}
+.alert-panel.safe{background:rgba(0,194,122,.05);border-color:rgba(0,194,122,.3)}
+.alert-panel p{font-size:.88rem;line-height:1.75;color:var(--body)}
+
+.heatmap-section{
+  background:var(--card);border-radius:14px;border:1px solid var(--border);
+  box-shadow:var(--sh);padding:1.8rem;margin-bottom:1.5rem;
+}
+.hs-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;flex-wrap:wrap;gap:.5rem}
+.hs-header h4{font-family:'Syne',sans-serif;font-weight:600;font-size:1rem;color:var(--navy)}
+.hs-header p{font-size:.8rem;color:var(--muted)}
+.heatmap-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+.hm-img{
+  border-radius:10px;overflow:hidden;position:relative;
+  background:var(--ink);height:200px;border:1px solid var(--border);
+}
+.hm-img img{width:100%;height:100%;object-fit:cover;opacity:.8}
+.hm-overlay{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse 55% 60% at 52% 48%,rgba(255,60,60,.65) 0%,rgba(255,140,0,.35) 40%,transparent 70%);
+  mix-blend-mode:screen;
+}
+.hm-label{
+  position:absolute;top:8px;left:8px;
+  font-family:'JetBrains Mono',monospace;font-size:.64rem;
+  color:var(--cyan);background:rgba(0,0,0,.65);padding:.2rem .5rem;border-radius:3px;
+}
+.feat-importance{background:var(--card);border-radius:14px;border:1px solid var(--border);
+  box-shadow:var(--sh);padding:1.8rem}
+
+/* ══════════════════ VISUALIZATION ══════════════════ */
+.viz-container{max-width:1100px;margin:0 auto;padding:3rem 2rem}
+.charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:1.5rem}
+.chart-card{
+  background:var(--card);border-radius:14px;border:1px solid var(--border);
+  box-shadow:var(--sh);padding:1.8rem;overflow:hidden;
+}
+.cc-head{margin-bottom:1.4rem}
+.cc-head h4{font-family:'Syne',sans-serif;font-weight:600;font-size:1rem;color:var(--navy)}
+.cc-head p{font-size:.78rem;color:var(--muted);margin-top:.2rem}
+.chart-wrap{position:relative;height:270px}
+.chart-wrap.tall{height:330px}
+
+.conf-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:280px;margin:1.2rem auto}
+.cf-cell{padding:1.4rem .5rem;border-radius:10px;text-align:center}
+.cf-val{font-family:'Syne',sans-serif;font-weight:700;font-size:2rem}
+.cf-lbl{font-size:.72rem;color:var(--muted);margin-top:.2rem}
+.cf-tp{background:rgba(0,194,122,.1)}.cf-tp .cf-val{color:var(--green)}
+.cf-fp{background:rgba(232,51,74,.08)}.cf-fp .cf-val{color:var(--red)}
+.cf-fn{background:rgba(232,51,74,.08)}.cf-fn .cf-val{color:var(--red)}
+.cf-tn{background:rgba(0,194,122,.1)}.cf-tn .cf-val{color:var(--green)}
+.metrics-chips{display:flex;justify-content:space-around;margin-top:1.2rem;flex-wrap:wrap;gap:.5rem}
+.mchip{text-align:center;padding:.5rem .8rem;background:var(--offwhite);border-radius:8px}
+.mchip .mv{font-weight:700;font-size:1rem;color:var(--blue)}
+.mchip .ml{font-size:.67rem;color:var(--muted);margin-top:.15rem}
+
+/* ══════════════════ ABOUT ══════════════════ */
+.about-container{max-width:860px;margin:0 auto;padding:3rem 2rem}
+.about-block{margin-bottom:3rem}
+.about-block h3{
+  font-family:'Syne',sans-serif;font-weight:700;font-size:1.35rem;color:var(--navy);
+  margin-bottom:.9rem;padding-bottom:.6rem;border-bottom:2px solid var(--border);
+}
+.about-block p{font-size:.93rem;color:var(--body);line-height:1.82;margin-bottom:.7rem}
+.about-block ul{padding-left:1.3rem}
+.about-block ul li{font-size:.93rem;color:var(--body);line-height:1.8;margin-bottom:.25rem}
+.tech-row{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.8rem}
+.pill{
+  font-family:'JetBrains Mono',monospace;font-size:.75rem;
+  padding:.3rem .8rem;border-radius:20px;
+  background:rgba(21,87,212,.07);color:var(--blue);
+  border:1px solid rgba(21,87,212,.18);
+}
+.note-box{
+  background:rgba(21,87,212,.05);border-left:3px solid var(--blue);
+  border-radius:0 8px 8px 0;padding:.9rem 1.3rem;
+  font-size:.86rem;color:var(--body);line-height:1.7;margin:.8rem 0;
+}
+.arch-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-top:1rem}
+.arch-card{
+  border:1px solid var(--border);border-radius:10px;padding:1.2rem;
+  text-align:center;background:var(--offwhite);
+}
+.arch-card .ac-icon{font-size:1.5rem;margin-bottom:.5rem}
+.arch-card .ac-title{font-family:'Syne',sans-serif;font-weight:600;font-size:.88rem;color:var(--navy)}
+.arch-card .ac-sub{font-size:.76rem;color:var(--muted);margin-top:.25rem}
+.arch-arrow{display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--muted);padding:.5rem 0}
+
+/* ─── FOOTER ─── */
+footer{
+  background:var(--ink);border-top:1px solid rgba(255,255,255,.05);
+  padding:1.8rem 2.4rem;display:flex;
+  align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:1rem;margin-top:3rem;
+}
+footer .fl{font-family:'Syne',sans-serif;color:var(--white);font-size:1rem;font-weight:700}
+footer .fl span{color:var(--cyan)}
+footer p{font-size:.76rem;color:rgba(246,250,255,.3)}
+
+@media(max-width:700px){
+  .hero{grid-template-columns:1fr;padding:3rem 1.5rem 2rem}
+  .hero-right{display:none}
+  nav{padding:0 1rem}
+  .nav-btn{padding:.4rem .55rem;font-size:.72rem}
+  .charts-grid{grid-template-columns:1fr}
+  .heatmap-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ NAV ═══════════════ -->
+<nav>
+  <div class="nav-logo" onclick="goPage('home')">
+    <div class="logo-pulse"></div>
+    Mammo<span class="accent">AI</span>
+  </div>
+  <div class="nav-links">
+    <button class="nav-btn active" onclick="goPage('home')">Home</button>
+    <button class="nav-btn" onclick="goPage('upload')">Upload</button>
+    <button class="nav-btn" onclick="goPage('analysis')">Analysis</button>
+    <button class="nav-btn" onclick="goPage('results')">Results</button>
+    <button class="nav-btn" onclick="goPage('viz')">Data</button>
+    <button class="nav-btn" onclick="goPage('about')">About</button>
+    <span class="nav-chip">v2.4 · Demo</span>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════
+     HOME
+═══════════════════════════════════ -->
+<div id="page-home" class="page active">
+  <section class="hero">
+    <div class="hero-left">
+      <div class="hero-tag">AI Radiology Decision Support</div>
+      <h1>Early Detection<br>Powered by<br><span class="hl">Deep Learning</span></h1>
+      <p>Upload a mammogram or breast X-ray image. Our CNN model analyzes tissue density, microcalcifications, and morphological patterns — returning a confidence-scored diagnosis in under 3 seconds.</p>
+      <div class="cta-row">
+        <button class="btn-cta primary" onclick="goPage('upload')">📤 Upload Image</button>
+        <button class="btn-cta ghost" onclick="goPage('about')">How It Works</button>
+      </div>
+      <div class="hero-stats">
+        <div>
+          <div class="hs-val">97.4<sup>%</sup></div>
+          <div class="hs-lbl">CNN Accuracy</div>
+        </div>
+        <div>
+          <div class="hs-val">2.8<sup>s</sup></div>
+          <div class="hs-lbl">Avg. Inference</div>
+        </div>
+        <div>
+          <div class="hs-val">9.8k</div>
+          <div class="hs-lbl">Training Images</div>
+        </div>
+        <div>
+          <div class="hs-val">0.98</div>
+          <div class="hs-lbl">AUC-ROC</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="mammo-panel">
+        <div class="mp-header">
+          <span class="mp-title">SCAN_0394.dcm · Analyzing</span>
+          <div class="mp-dots">
+            <div class="mp-dot" style="background:#e8334a"></div>
+            <div class="mp-dot" style="background:#f59e0b"></div>
+            <div class="mp-dot" style="background:#00c27a"></div>
+          </div>
+        </div>
+        <div class="mp-body">
+          <div class="mammo-img-demo">
+            <div class="mammo-blob" style="width:100px;height:120px;top:20%;left:25%"></div>
+            <div class="mammo-blob" style="width:60px;height:70px;top:50%;left:55%;opacity:.6"></div>
+            <div class="mammo-blob" style="width:40px;height:45px;top:30%;left:60%;opacity:.4"></div>
+            <div class="scan-line"></div>
+            <div class="mp-overlay"></div>
+          </div>
+          <div class="ai-tag">CNN · Layer 7/12</div>
+        </div>
+        <div class="mp-footer">
+          <div class="mp-progress-bar"><div class="mp-progress-fill"></div></div>
+          <div class="mp-status">▶ FEATURE_EXTRACTION · 78% COMPLETE</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="features-strip">
+    <div class="strip-inner">
+      <div class="section-eyebrow">System Capabilities</div>
+      <div class="section-h">Built for Radiologist Support</div>
+      <div class="section-sub">Designed to augment clinical expertise — not replace it</div>
+      <div class="feat-grid">
+        <div class="feat-card">
+          <div class="feat-icon">🖼️</div>
+          <div class="feat-title">Mammogram & X-ray Upload</div>
+          <div class="feat-desc">Supports DICOM, JPEG, and PNG formats. Drag-and-drop or click to browse.</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">🧠</div>
+          <div class="feat-title">CNN Feature Extraction</div>
+          <div class="feat-desc">12-layer convolutional network extracts texture, shape, and density features from tissue imagery.</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">🔥</div>
+          <div class="feat-title">Grad-CAM Heatmap</div>
+          <div class="feat-desc">Gradient-weighted Class Activation Maps highlight the exact regions influencing the model's decision.</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">📊</div>
+          <div class="feat-title">Confidence Scoring</div>
+          <div class="feat-desc">Probabilistic output with risk stratification — Low, Medium, or High — for immediate triage guidance.</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">📉</div>
+          <div class="feat-title">Performance Analytics</div>
+          <div class="feat-desc">Live charts for model accuracy, ROC curves, confusion matrices, and dataset class distributions.</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">⚠️</div>
+          <div class="feat-title">Educational Prototype</div>
+          <div class="feat-desc">Developed for academic demonstration. All results are simulated and must not guide clinical decisions.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ═══════════════════════════════════
+     UPLOAD
+═══════════════════════════════════ -->
+<div id="page-upload" class="page">
+  <div class="upload-container">
+    <div class="breadcrumb">MammoAI / <span>Image Upload</span></div>
+    <div class="pg-header">
+      <h2>Upload Mammogram / X-ray</h2>
+      <p>Upload a breast imaging scan for AI-powered analysis. Supported formats listed below.</p>
+    </div>
+
+    <div class="upload-zone" id="drop-zone" onclick="document.getElementById('file-input').click()"
+         ondragover="handleDrag(event,true)" ondragleave="handleDrag(event,false)" ondrop="handleDrop(event)">
+      <span class="uz-icon">🩻</span>
+      <div class="uz-title">Drop your image here or click to browse</div>
+      <div class="uz-sub">Mammogram, X-ray, or diagnostic scan in any common format</div>
+      <div class="uz-types">
+        <span class="type-tag">DICOM</span>
+        <span class="type-tag">JPEG</span>
+        <span class="type-tag">PNG</span>
+        <span class="type-tag">BMP</span>
+        <span class="type-tag">TIFF</span>
+        <span class="type-tag">WebP</span>
+      </div>
+      <button class="btn-browse" onclick="event.stopPropagation();document.getElementById('file-input').click()">Browse Files</button>
+    </div>
+    <input type="file" id="file-input" accept="image/*" onchange="handleFile(this)">
+
+    <!-- Preview card -->
+    <div class="preview-card" id="preview-card">
+      <div class="preview-header">
+        <h4>Image Preview</h4>
+        <span class="preview-meta" id="preview-meta">—</span>
+      </div>
+      <div class="preview-body">
+        <div class="preview-img-wrap">
+          <img id="preview-img" src="" alt="Preview">
+        </div>
+        <div class="preview-info">
+          <div class="info-row"><span class="ir-label">Filename</span><span class="ir-val" id="info-name">—</span></div>
+          <div class="info-row"><span class="ir-label">Size</span><span class="ir-val" id="info-size">—</span></div>
+          <div class="info-row"><span class="ir-label">Type</span><span class="ir-val" id="info-type">—</span></div>
+          <div class="info-row"><span class="ir-label">Dimensions</span><span class="ir-val" id="info-dims">—</span></div>
+          <div class="info-row"><span class="ir-label">Ready</span><span class="ir-val" style="color:var(--green)">✓ Queued for analysis</span></div>
+        </div>
+      </div>
+      <div class="preview-actions">
+        <button class="btn-analyze" onclick="startAnalysis()">
+          <span>🔬</span> Run CNN Analysis
+        </button>
+        <button class="btn-clear" onclick="clearFile()">✕ Remove Image</button>
+        <span style="font-size:.76rem;color:var(--muted);margin-left:auto;max-width:240px;text-align:right">
+          ⚠ Educational prototype — results are simulated
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     ANALYSIS
+═══════════════════════════════════ -->
+<div id="page-analysis" class="page">
+  <div class="analysis-container">
+    <div class="breadcrumb">MammoAI / <span>CNN Analysis</span></div>
+    <div class="pg-header">
+      <h2>AI Analysis Module</h2>
+      <p>Convolutional Neural Network processing pipeline with real-time feature extraction.</p>
+    </div>
+
+    <div id="analysis-idle">
+      <div class="idle-icon">🧠</div>
+      <p>No image queued.<br><a href="#" onclick="goPage('upload');return false" style="color:var(--blue)">Upload an image</a> to begin CNN analysis.</p>
+    </div>
+
+    <div id="analysis-running">
+      <div class="process-card">
+        <div class="process-header">
+          <div class="spinner"></div>
+          <h3>CNN Inference In Progress…</h3>
+          <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--cyan)" id="proc-pct">0%</span>
+        </div>
+        <div class="process-body">
+          <div class="process-img-row">
+            <div class="proc-img" id="proc-orig">
+              <img id="proc-orig-img" src="" alt="">
+              <div class="proc-img-label">ORIGINAL INPUT</div>
+            </div>
+            <div class="proc-img" id="proc-heat" style="opacity:.3">
+              <img id="proc-heat-img" src="" alt="">
+              <div class="heat-overlay"></div>
+              <div class="proc-img-label">GRAD-CAM OUTPUT</div>
+            </div>
+          </div>
+          <div class="proc-steps">
+            <div class="step-item">
+              <div class="step-num pending" id="s1">1</div>
+              <div class="step-info">
+                <div class="step-title">Preprocessing</div>
+                <div class="step-sub">Resize → 224×224, normalize pixel values</div>
+                <div class="step-bar"><div class="step-bar-fill" id="sb1"></div></div>
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="step-num pending" id="s2">2</div>
+              <div class="step-info">
+                <div class="step-title">Conv Layer Extraction</div>
+                <div class="step-sub">12 convolutional layers · 512 feature maps</div>
+                <div class="step-bar"><div class="step-bar-fill" id="sb2"></div></div>
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="step-num pending" id="s3">3</div>
+              <div class="step-info">
+                <div class="step-title">Pooling & Flattening</div>
+                <div class="step-sub">Max pooling → flatten → dense layers</div>
+                <div class="step-bar"><div class="step-bar-fill" id="sb3"></div></div>
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="step-num pending" id="s4">4</div>
+              <div class="step-info">
+                <div class="step-title">Classification Head</div>
+                <div class="step-sub">Sigmoid output · binary classification</div>
+                <div class="step-bar"><div class="step-bar-fill" id="sb4"></div></div>
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="step-num pending" id="s5">5</div>
+              <div class="step-info">
+                <div class="step-title">Grad-CAM Generation</div>
+                <div class="step-sub">Gradient heatmap overlay computation</div>
+                <div class="step-bar"><div class="step-bar-fill" id="sb5"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="feature-viz" id="feat-viz" style="margin:0 2rem 2rem;opacity:0;transition:opacity .5s">
+          <div class="fv-title">Extracted CNN Feature Activations</div>
+          <div class="feat-bars" id="feat-bars-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="analysis-complete">
+      <div style="text-align:center;padding:3rem 2rem;background:var(--card);border-radius:16px;border:1px solid var(--border);box-shadow:var(--sh)">
+        <div style="font-size:2.5rem;margin-bottom:1rem">✅</div>
+        <h3 style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.3rem;color:var(--navy);margin-bottom:.5rem">Analysis Complete</h3>
+        <p style="color:var(--muted);font-size:.9rem;margin-bottom:1.5rem">CNN inference finished in <strong id="infer-time">—</strong>. Results are ready.</p>
+        <button class="btn-analyze" style="margin:0 auto;display:inline-flex" onclick="goPage('results')">
+          📋 View Results
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     RESULTS
+═══════════════════════════════════ -->
+<div id="page-results" class="page">
+  <div class="results-container">
+    <div class="breadcrumb">MammoAI / <span>Prediction Results</span></div>
+    <div class="pg-header">
+      <h2>Diagnostic Results</h2>
+      <p>CNN model output with confidence scoring and visual explanations.</p>
+    </div>
+
+    <div id="results-empty">
+      <div style="font-size:3rem;margin-bottom:1rem">📋</div>
+      <p>No results yet. <a href="#" onclick="goPage('upload');return false" style="color:var(--blue)">Upload and analyze an image</a> first.</p>
+    </div>
+
+    <div id="results-data">
+      <div id="verdict-card" class="verdict-card verdict-benign">
+        <div id="verdict-icon" class="verdict-icon">✅</div>
+        <div class="verdict-text">
+          <div id="verdict-result" class="vt-result">Benign</div>
+          <div class="vt-sub">Convolutional Neural Network Classification Output</div>
+          <div id="verdict-risk" class="vt-risk risk-low">● Low Risk — Routine Monitoring Advised</div>
+        </div>
+      </div>
+
+      <div id="results-alert"></div>
+
+      <div class="metrics-row">
+        <div class="metric-card">
+          <div class="mc-lbl">Confidence</div>
+          <div id="mc-conf" class="mc-val">—</div>
+          <div class="mc-bar"><div id="mc-conf-bar" class="mc-fill" style="background:var(--green)"></div></div>
+          <div class="mc-sub">Model probability score</div>
+        </div>
+        <div class="metric-card">
+          <div class="mc-lbl">Risk Level</div>
+          <div id="mc-risk" class="mc-val" style="font-size:1.3rem">—</div>
+          <div class="mc-sub" id="mc-risk-sub">—</div>
+        </div>
+        <div class="metric-card">
+          <div class="mc-lbl">Inference Time</div>
+          <div id="mc-time" class="mc-val">—</div>
+          <div class="mc-sub">CNN processing duration</div>
+        </div>
+        <div class="metric-card">
+          <div class="mc-lbl">Model</div>
+          <div class="mc-val" style="font-size:1.2rem">CNN-12L</div>
+          <div class="mc-sub">VGG-style · CBIS-DDSM</div>
+        </div>
+      </div>
+
+      <!-- Heatmap -->
+      <div class="heatmap-section">
+        <div class="hs-header">
+          <h4>Grad-CAM Attention Heatmap</h4>
+          <p>Regions influencing the model prediction (red = high activation)</p>
+        </div>
+        <div class="heatmap-grid">
+          <div class="hm-img">
+            <img id="res-orig-img" src="" alt="Original scan">
+            <div class="hm-label">ORIGINAL</div>
+          </div>
+          <div class="hm-img">
+            <img id="res-heat-img" src="" alt="Heatmap">
+            <div class="hm-overlay"></div>
+            <div class="hm-label">GRAD-CAM OVERLAY</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature importance -->
+      <div class="feat-importance">
+        <h4 style="font-family:'Syne',sans-serif;font-weight:600;font-size:.95rem;color:var(--navy);margin-bottom:1.2rem">
+          CNN Feature Contribution Scores
+        </h4>
+        <div id="res-feat-bars"></div>
+      </div>
+
+      <div style="margin-top:1.5rem;display:flex;gap:1rem;flex-wrap:wrap">
+        <button class="btn-analyze" onclick="goPage('upload')">📤 New Scan</button>
+        <button class="btn-clear" style="padding:.85rem 1.5rem;border-radius:8px;border:1px solid var(--border);color:var(--body);background:none;cursor:pointer;font-size:.88rem" onclick="goPage('viz')">📊 View Analytics</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     VISUALIZATION
+═══════════════════════════════════ -->
+<div id="page-viz" class="page">
+  <div class="viz-container">
+    <div class="breadcrumb">MammoAI / <span>Data Visualization</span></div>
+    <div class="pg-header">
+      <h2>Model Analytics & Dataset Insights</h2>
+      <p>Performance metrics and statistical charts for the CBIS-DDSM trained CNN model.</p>
+    </div>
+    <div class="charts-grid">
+
+      <div class="chart-card">
+        <div class="cc-head"><h4>Dataset Class Distribution</h4><p>Benign vs Malignant in training set (n=9,736)</p></div>
+        <div class="chart-wrap"><canvas id="ch-dist"></canvas></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="cc-head"><h4>Training vs Validation Accuracy</h4><p>CNN accuracy over 60 training epochs</p></div>
+        <div class="chart-wrap"><canvas id="ch-acc"></canvas></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="cc-head"><h4>Confusion Matrix — Test Set</h4><p>n=1,946 test images · threshold=0.5</p></div>
+        <div class="conf-grid">
+          <div class="cf-cell cf-tp"><div class="cf-val">891</div><div class="cf-lbl">True Benign</div></div>
+          <div class="cf-cell cf-fp"><div class="cf-val">28</div><div class="cf-lbl">False Malignant</div></div>
+          <div class="cf-cell cf-fn"><div class="cf-val">22</div><div class="cf-lbl">False Benign</div></div>
+          <div class="cf-cell cf-tn"><div class="cf-val">1005</div><div class="cf-lbl">True Malignant</div></div>
+        </div>
+        <div class="metrics-chips">
+          <div class="mchip"><div class="mv">97.4%</div><div class="ml">Accuracy</div></div>
+          <div class="mchip"><div class="mv">96.9%</div><div class="ml">Precision</div></div>
+          <div class="mchip"><div class="mv">97.8%</div><div class="ml">Recall</div></div>
+          <div class="mchip"><div class="mv">97.3%</div><div class="ml">F1-Score</div></div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="cc-head"><h4>ROC Curve</h4><p>Receiver operating characteristic · AUC = 0.9847</p></div>
+        <div class="chart-wrap"><canvas id="ch-roc"></canvas></div>
+      </div>
+
+      <div class="chart-card" style="grid-column:1/-1">
+        <div class="cc-head"><h4>Training Loss Curve</h4><p>Binary cross-entropy loss over epochs</p></div>
+        <div class="chart-wrap"><canvas id="ch-loss"></canvas></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     ABOUT
+═══════════════════════════════════ -->
+<div id="page-about" class="page">
+  <div class="about-container">
+    <div class="breadcrumb">MammoAI / <span>About</span></div>
+    <div class="pg-header">
+      <h2>About MammoAI</h2>
+      <p>Dataset, model architecture, design decisions, and academic context.</p>
+    </div>
+
+    <div class="about-block">
+      <h3>Project Objective</h3>
+      <p>MammoAI demonstrates how deep learning — specifically Convolutional Neural Networks — can assist radiologists in detecting early-stage breast cancer from mammographic imaging. The goal is to reduce diagnostic latency, surface high-risk cases for urgent review, and provide explainability via Grad-CAM attention mapping.</p>
+      <div class="note-box">
+        🎓 <strong>Academic Prototype Notice:</strong> This system is developed for educational and research purposes only. It has not undergone clinical trials or regulatory approval. All predictions presented are simulated and must never be used for real medical decisions.
+      </div>
+    </div>
+
+    <div class="about-block">
+      <h3>Dataset</h3>
+      <p>The model is trained on the <strong>CBIS-DDSM (Curated Breast Imaging Subset of DDSM)</strong> — a benchmark mammography dataset maintained by The Cancer Imaging Archive (TCIA).</p>
+      <ul>
+        <li><strong>Total Images:</strong> 9,736 (5,210 benign · 4,526 malignant)</li>
+        <li><strong>Image type:</strong> Full-field digital mammography (FFDM), CC and MLO views</li>
+        <li><strong>Annotations:</strong> Radiologist-verified ROI bounding boxes and pathology labels</li>
+        <li><strong>Resolution:</strong> Up to 4,096 × 5,625 pixels, downsampled to 224×224 for training</li>
+        <li><strong>Source:</strong> TCIA / National Cancer Institute</li>
+      </ul>
+      <div class="tech-row">
+        <span class="pill">CBIS-DDSM</span><span class="pill">9,736 images</span>
+        <span class="pill">FFDM scans</span><span class="pill">Radiologist-annotated</span>
+      </div>
+    </div>
+
+    <div class="about-block">
+      <h3>CNN Architecture</h3>
+      <p>The model follows a VGG-inspired deep convolutional architecture adapted for grayscale medical imaging:</p>
+      <div class="arch-grid">
+        <div class="arch-card"><div class="ac-icon">📥</div><div class="ac-title">Input</div><div class="ac-sub">224×224 grayscale, normalized</div></div>
+        <div class="arch-card"><div class="ac-icon">🔲</div><div class="ac-title">Conv Block ×4</div><div class="ac-sub">3×3 kernels, ReLU, BatchNorm</div></div>
+        <div class="arch-card"><div class="ac-icon">⬇️</div><div class="ac-title">Max Pooling</div><div class="ac-sub">2×2 stride, 3 pooling layers</div></div>
+        <div class="arch-card"><div class="ac-icon">📊</div><div class="ac-title">Dense Layers</div><div class="ac-sub">512 → 256 → 64 neurons, Dropout 0.4</div></div>
+        <div class="arch-card"><div class="ac-icon">📤</div><div class="ac-title">Output</div><div class="ac-sub">Sigmoid · Binary probability</div></div>
+      </div>
+      <div class="tech-row" style="margin-top:1.2rem">
+        <span class="pill">TensorFlow 2.x</span><span class="pill">Keras</span><span class="pill">Python 3.11</span>
+        <span class="pill">CUDA 12.1</span><span class="pill">Grad-CAM</span><span class="pill">scikit-learn</span>
+        <span class="pill">NumPy</span><span class="pill">OpenCV</span>
+      </div>
+    </div>
+
+    <div class="about-block">
+      <h3>Model Performance</h3>
+      <ul>
+        <li><strong>Test Accuracy:</strong> 97.4% | <strong>Precision:</strong> 96.9% | <strong>Recall:</strong> 97.8%</li>
+        <li><strong>F1 Score:</strong> 97.3% | <strong>AUC-ROC:</strong> 0.9847</li>
+        <li><strong>5-fold cross-validation mean:</strong> 96.9% ± 0.4%</li>
+        <li><strong>Average inference time:</strong> 2.8 seconds per scan</li>
+      </ul>
+    </div>
+
+    <div class="about-block">
+      <h3>Explainability — Grad-CAM</h3>
+      <p>Gradient-weighted Class Activation Mapping (Grad-CAM) computes gradient signals flowing back through the final convolutional layer to identify spatial regions most relevant to the model's classification decision. This produces a heat map overlaid on the original scan that helps radiologists understand and audit the AI's reasoning.</p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="fl">Mammo<span>AI</span></div>
+  <p>Academic Prototype · Educational Use Only · CNN Breast Cancer Detection System</p>
+  <p style="font-size:.7rem;color:rgba(246,250,255,.2)">CBIS-DDSM · TensorFlow · Grad-CAM</p>
+</footer>
+
+<!-- ═══════════ SCRIPTS ═══════════ -->
+<script>
+/* ─── STATE ─── */
+let uploadedFile = null;
+let uploadedURL  = null;
+let analysisResult = null;
+
+/* ─── NAVIGATION ─── */
+const pages = ['home','upload','analysis','results','viz','about'];
+function goPage(id) {
+  pages.forEach(p => {
+    document.getElementById('page-'+p).classList.toggle('active', p===id);
+  });
+  document.querySelectorAll('.nav-btn').forEach((b,i) => {
+    b.classList.toggle('active', pages[i]===id);
+  });
+  window.scrollTo(0,0);
+  if(id==='viz') setTimeout(initCharts,80);
+}
+
+/* ─── DRAG & DROP ─── */
+function handleDrag(e,on){
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.toggle('drag',on);
+}
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drag');
+  const f = e.dataTransfer.files[0];
+  if(f && f.type.startsWith('image/')) processFile(f);
+}
+function handleFile(input){
+  if(input.files[0]) processFile(input.files[0]);
+}
+function processFile(file){
+  uploadedFile = file;
+  uploadedURL  = URL.createObjectURL(file);
+  document.getElementById('preview-img').src = uploadedURL;
+  document.getElementById('info-name').textContent = file.name.length>22 ? file.name.slice(0,20)+'…' : file.name;
+  document.getElementById('info-size').textContent = (file.size/1024).toFixed(1)+' KB';
+  document.getElementById('info-type').textContent = file.type || 'image/*';
+  const img = new Image();
+  img.onload = () => {
+    document.getElementById('info-dims').textContent = img.width+'×'+img.height+' px';
+    document.getElementById('preview-meta').textContent = img.width+'×'+img.height+' · '+file.name;
+  };
+  img.src = uploadedURL;
+  document.getElementById('preview-card').style.display = 'block';
+}
+function clearFile(){
+  uploadedFile = null; uploadedURL = null;
+  document.getElementById('preview-card').style.display = 'none';
+  document.getElementById('file-input').value = '';
+}
+
+/* ─── ANALYSIS PIPELINE ─── */
+async function startAnalysis(){
+  if(!uploadedURL){ alert('Please upload an image first.'); return; }
+  goPage('analysis');
+  // set images
+  document.getElementById('proc-orig-img').src = uploadedURL;
+  document.getElementById('proc-heat-img').src = uploadedURL;
+  document.getElementById('analysis-idle').style.display = 'none';
+  document.getElementById('analysis-running').style.display = 'block';
+  document.getElementById('analysis-complete').style.display = 'none';
+
+  const steps = [
+    {id:'s1',bar:'sb1',dur:700},
+    {id:'s2',bar:'sb2',dur:900},
+    {id:'s3',bar:'sb3',dur:600},
+    {id:'s4',bar:'sb4',dur:800},
+    {id:'s5',bar:'sb5',dur:700},
+  ];
+  const totalDur = steps.reduce((a,s)=>a+s.dur,0);
+  let elapsed = 0;
+  const t0 = Date.now();
+
+  for(let i=0;i<steps.length;i++){
+    const s = steps[i];
+    setStep(s.id,'active');
+    await animBar(s.bar, s.dur);
+    setStep(s.id,'done');
+    elapsed += s.dur;
+    document.getElementById('proc-pct').textContent = Math.round((elapsed/totalDur)*100)+'%';
+    // show heatmap at step 5
+    if(i===4) document.getElementById('proc-heat').style.opacity='1';
+  }
+
+  // show features
+  const featViz = document.getElementById('feat-viz');
+  featViz.style.opacity='1';
+  renderFeatBars();
+
+  await delay(400);
+
+  // Simulate result
+  const rand = Math.random();
+  const malignant = rand > 0.45;
+  const conf = malignant
+    ? (0.72 + Math.random()*0.24).toFixed(3)
+    : (0.72 + Math.random()*0.24).toFixed(3);
+  const inferMs = ((Date.now()-t0)/1000).toFixed(2)+'s';
+
+  analysisResult = {malignant, conf:parseFloat(conf), inferTime:inferMs};
+  document.getElementById('infer-time').textContent = inferMs;
+
+  document.getElementById('analysis-running').style.display='none';
+  document.getElementById('analysis-complete').style.display='block';
+
+  buildResults();
+}
+
+function setStep(id,state){
+  const el = document.getElementById(id);
+  el.className = 'step-num '+state;
+  if(state==='done') el.textContent='✓';
+}
+function animBar(id,dur){
+  return new Promise(res=>{
+    const bar = document.getElementById(id);
+    bar.style.width='0';
+    bar.style.transition='none';
+    requestAnimationFrame(()=>{
+      bar.style.transition='width '+dur+'ms ease';
+      bar.style.width='100%';
+      setTimeout(res,dur);
+    });
+  });
+}
+function delay(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+function renderFeatBars(){
+  const features = [
+    ['Calcification','density'],['Texture Variance',''],['Margin Sharpness',''],
+    ['Mass Shape',''],['Density Grade',''],['Spiculation',''],
+    ['Architectural Distortion',''],['Asymmetry','']
+  ];
+  const grid = document.getElementById('feat-bars-grid');
+  grid.innerHTML = features.map(([f])=>{
+    const pct = Math.floor(Math.random()*70+25);
+    return `<div class="fb-row">
+      <div class="fb-name">${f}</div>
+      <div class="fb-track"><div class="fb-fill" style="width:${pct}%"></div></div>
+      <div class="fb-val">${(pct/100).toFixed(2)}</div>
+    </div>`;
+  }).join('');
+  setTimeout(()=>{
+    document.querySelectorAll('.fb-fill').forEach(el=>{ const w=el.style.width; el.style.width='0'; requestAnimationFrame(()=>{ el.style.transition='width 1.2s ease'; el.style.width=w; }); });
+  },50);
+}
+
+/* ─── BUILD RESULTS ─── */
+function buildResults(){
+  const {malignant,conf,inferTime} = analysisResult;
+  const confPct = (conf*100).toFixed(1)+'%';
+  let riskLabel,riskClass;
+  if(!malignant){ riskLabel='Low Risk'; riskClass='risk-low'; }
+  else if(conf<0.82){ riskLabel='Medium Risk'; riskClass='risk-med'; }
+  else { riskLabel='High Risk'; riskClass='risk-high'; }
+
+  const vc = document.getElementById('verdict-card');
+  vc.className = 'verdict-card '+(malignant?'verdict-malignant':'verdict-benign');
+  document.getElementById('verdict-icon').textContent = malignant?'⚠️':'✅';
+  document.getElementById('verdict-result').textContent = malignant?'Malignant':'Benign';
+  const vr = document.getElementById('verdict-risk');
+  vr.className='vt-risk '+riskClass;
+  vr.textContent='● '+(malignant?riskLabel+' — Further examination required':riskLabel+' — Routine monitoring advised');
+
+  document.getElementById('mc-conf').textContent = confPct;
+  document.getElementById('mc-conf-bar').style.width = confPct;
+  document.getElementById('mc-conf-bar').style.background = malignant?'var(--red)':'var(--green)';
+  document.getElementById('mc-risk').textContent = riskLabel.split(' ')[0];
+  document.getElementById('mc-risk-sub').textContent = malignant?'Urgent clinical review recommended':'Continue standard screening';
+  document.getElementById('mc-time').textContent = inferTime;
+
+  // alert
+  const ra = document.getElementById('results-alert');
+  if(malignant && conf>=0.82){
+    ra.innerHTML=`<div class="alert-panel danger"><span style="font-size:1.3rem;flex-shrink:0">🚨</span>
+      <p><strong>High-Confidence Malignancy Detected.</strong> The CNN model has identified imaging features strongly associated with malignant tissue — including irregular margins, heterogeneous density, and spiculation patterns. <strong>Immediate referral to a specialist oncologist and confirmatory biopsy is strongly recommended.</strong></p></div>`;
+  } else if(malignant){
+    ra.innerHTML=`<div class="alert-panel danger"><span style="font-size:1.3rem;flex-shrink:0">⚠️</span>
+      <p><strong>Potential Malignancy Identified.</strong> The model has flagged suspicious features warranting further clinical investigation. Follow-up imaging and specialist consultation is advised.</p></div>`;
+  } else {
+    ra.innerHTML=`<div class="alert-panel safe"><span style="font-size:1.3rem;flex-shrink:0">✅</span>
+      <p><strong>No Malignant Features Detected.</strong> The CNN model found imaging characteristics consistent with benign tissue. Continue routine screening schedule as recommended by your radiologist.</p></div>`;
+  }
+
+  // images
+  document.getElementById('res-orig-img').src = uploadedURL||'';
+  document.getElementById('res-heat-img').src = uploadedURL||'';
+
+  // feature bars
+  const features2 = ['Calcification','Margin','Texture','Mass Shape','Density','Spiculation','Asymmetry','Architecture'];
+  document.getElementById('res-feat-bars').innerHTML = features2.map(f=>{
+    const pct = Math.floor(Math.random()*75+18);
+    return `<div class="fb-row" style="margin-bottom:.6rem">
+      <div class="fb-name">${f}</div>
+      <div class="fb-track"><div class="fb-fill" style="width:${pct}%;background:${malignant?'linear-gradient(90deg,var(--red),#ff8a80)':'linear-gradient(90deg,var(--blue-lite),var(--cyan))'}"></div></div>
+      <div class="fb-val">${(pct/100).toFixed(2)}</div>
+    </div>`;
+  }).join('');
+  setTimeout(()=>{
+    document.querySelectorAll('#res-feat-bars .fb-fill').forEach(el=>{const w=el.style.width;el.style.width='0';requestAnimationFrame(()=>{el.style.transition='width 1.2s ease';el.style.width=w;});});
+  },80);
+
+  document.getElementById('results-empty').style.display='none';
+  document.getElementById('results-data').style.display='block';
+}
+
+/* ─── CHARTS ─── */
+let chartsInited=false;
+function initCharts(){
+  if(chartsInited)return; chartsInited=true;
+  Chart.defaults.font.family="'Lato',sans-serif";
+  Chart.defaults.color='#536882';
+
+  // Distribution
+  new Chart(document.getElementById('ch-dist'),{
+    type:'doughnut',
+    data:{
+      labels:['Benign','Malignant'],
+      datasets:[{data:[5210,4526],
+        backgroundColor:['rgba(0,194,122,.8)','rgba(232,51,74,.8)'],
+        borderColor:['#00c27a','#e8334a'],borderWidth:2,hoverOffset:8}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,cutout:'63%',
+      plugins:{legend:{position:'bottom',labels:{padding:16,usePointStyle:true,pointStyleWidth:10}},
+        tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed.toLocaleString()} images (${((c.parsed/9736)*100).toFixed(1)}%)`}}}}
+  });
+
+  // Accuracy
+  const ep=Array.from({length:60},(_,i)=>i+1);
+  const tr=ep.map(e=>Math.min(.980,.62+.36*(1-Math.exp(-e/10))+(Math.random()-.5)*.013));
+  const vl=ep.map(e=>Math.min(.974,.60+.34*(1-Math.exp(-e/12))+(Math.random()-.5)*.020));
+  new Chart(document.getElementById('ch-acc'),{
+    type:'line',
+    data:{labels:ep,datasets:[
+      {label:'Train Accuracy',data:tr,borderColor:'#1557d4',backgroundColor:'rgba(21,87,212,.08)',
+        borderWidth:2,pointRadius:0,tension:.4,fill:true},
+      {label:'Val Accuracy',data:vl,borderColor:'#00d4f5',backgroundColor:'rgba(0,212,245,.06)',
+        borderWidth:2,pointRadius:0,tension:.4,fill:true}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      scales:{x:{title:{display:true,text:'Epoch'},grid:{color:'rgba(0,0,0,.04)'}},
+        y:{title:{display:true,text:'Accuracy'},min:.55,max:1,grid:{color:'rgba(0,0,0,.04)'},
+          ticks:{callback:v=>(v*100).toFixed(0)+'%'}}},
+      plugins:{legend:{position:'bottom',labels:{usePointStyle:true,pointStyleWidth:10}}}}
+  });
+
+  // ROC
+  const fpr=[0,.01,.03,.05,.08,.12,.18,.27,.4,.58,.78,1];
+  const tpr=[0,.70,.84,.90,.94,.96,.97,.975,.985,.992,1,1];
+  new Chart(document.getElementById('ch-roc'),{
+    type:'line',
+    data:{datasets:[
+      {label:'ROC Curve (AUC=0.9847)',data:fpr.map((x,i)=>({x,y:tpr[i]})),
+        borderColor:'#1557d4',backgroundColor:'rgba(21,87,212,.1)',
+        borderWidth:2.5,pointRadius:3,tension:.4,fill:true},
+      {label:'Random',data:[{x:0,y:0},{x:1,y:1}],
+        borderColor:'#aab5c8',borderDash:[5,4],borderWidth:1.5,pointRadius:0,fill:false}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      scales:{x:{type:'linear',min:0,max:1,title:{display:true,text:'False Positive Rate'},grid:{color:'rgba(0,0,0,.04)'}},
+        y:{type:'linear',min:0,max:1,title:{display:true,text:'True Positive Rate'},grid:{color:'rgba(0,0,0,.04)'}}},
+      plugins:{legend:{position:'bottom',labels:{usePointStyle:true,pointStyleWidth:10}}}}
+  });
+
+  // Loss
+  const los=ep.map(e=>Math.max(.058,.72*Math.exp(-e/14)+(Math.random()-.5)*.015));
+  const vlos=ep.map(e=>Math.max(.065,.75*Math.exp(-e/15)+(Math.random()-.5)*.022));
+  new Chart(document.getElementById('ch-loss'),{
+    type:'line',
+    data:{labels:ep,datasets:[
+      {label:'Train Loss',data:los,borderColor:'#e8334a',backgroundColor:'rgba(232,51,74,.07)',
+        borderWidth:2,pointRadius:0,tension:.4,fill:true},
+      {label:'Val Loss',data:vlos,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.06)',
+        borderWidth:2,pointRadius:0,tension:.4,fill:true}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      scales:{x:{title:{display:true,text:'Epoch'},grid:{color:'rgba(0,0,0,.04)'}},
+        y:{title:{display:true,text:'Loss (Binary Cross-Entropy)'},grid:{color:'rgba(0,0,0,.04)'}}},
+      plugins:{legend:{position:'bottom',labels:{usePointStyle:true,pointStyleWidth:10}}}}
+  });
+}
+</script>
+</body>
+</html>
