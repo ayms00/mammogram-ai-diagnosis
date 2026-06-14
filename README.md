@@ -1,16 +1,10 @@
 # MammoAI — Breast Cancer Detection System
 
-![MammoAI Banner](https://img.shields.io/badge/MammoAI-v2.4%20Demo-1557d4?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyQzYuNDggMiAyIDYuNDggMiAxMnM0LjQ4IDEwIDEwIDEwIDEwLTQuNDggMTAtMTBTMTcuNTIgMiAxMiAyem0wIDE4Yy00LjQxIDAtOC0zLjU5LTgtOHMzLjU5LTggOC04IDggMy41OSA4IDgtMy41OSA4LTggOHoiLz48L3N2Zz4=)
-![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
-![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
-![Chart.js](https://img.shields.io/badge/Chart.js-FF6384?style=for-the-badge&logo=chartdotjs&logoColor=white)
-
-> **⚠️ Academic Prototype Notice:** This system is developed for **educational and research purposes only**. It has not undergone clinical trials or regulatory approval. All predictions are simulated and must **never** be used for real medical decisions.
+> ** Academic Prototype Notice:** This system is developed for **educational and research purposes only**. It has not undergone clinical trials or regulatory approval. All predictions are simulated and must **never** be used for real medical decisions.
 
 ---
 
-## 📋 Overview
+## Overview
 
 **MammoAI** is a front-end demonstration of a deep learning–powered breast cancer detection system. It simulates a Convolutional Neural Network (CNN) inference pipeline for mammographic image analysis, complete with Grad-CAM heatmap visualization and performance analytics.
 
@@ -18,21 +12,21 @@ Built as a single-file web application — no framework, no build step, just ope
 
 ---
 
-## ✨ Features
+## Features
 
 | Feature | Description |
 |---|---|
-| 🖼️ **Image Upload** | Drag-and-drop or browse for mammogram/X-ray images (JPEG, PNG, BMP, WebP, DICOM-like) |
-| 🧠 **CNN Pipeline** | Animated 5-step inference simulation: Preprocessing → Conv Extraction → Pooling → Classification → Grad-CAM |
-| 🔥 **Grad-CAM Heatmap** | Simulated gradient-weighted Class Activation Map highlighting suspicious regions |
-| 📊 **Confidence Scoring** | Probabilistic output with risk stratification (Low / Medium / High) |
-| 📉 **Performance Analytics** | Live Chart.js graphs — dataset distribution, training/validation accuracy, ROC curve, loss curves, confusion matrix |
-| 📋 **Diagnostic Results** | Benign/Malignant verdict with feature contribution scores and clinical action advice |
-| 🌐 **Fully Offline** | Single HTML file, zero backend, zero installation required |
+| **Image Upload** | Drag-and-drop or browse for mammogram/X-ray images (JPEG, PNG, BMP, WebP, DICOM-like) |
+| **CNN Pipeline** | Animated 5-step inference simulation: Preprocessing → Conv Extraction → Pooling → Classification → Grad-CAM |
+| **Grad-CAM Heatmap** | Simulated gradient-weighted Class Activation Map highlighting suspicious regions |
+| **Confidence Scoring** | Probabilistic output with risk stratification (Low / Medium / High) |
+| **Performance Analytics** | Live Chart.js graphs — dataset distribution, training/validation accuracy, ROC curve, loss curves, confusion matrix |
+| **Diagnostic Results** | Benign/Malignant verdict with feature contribution scores and clinical action advice |
+| **Fully Offline** | Single HTML file, zero backend, zero installation required |
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Option 1 — Open directly (simplest)
 ```bash
@@ -61,7 +55,7 @@ Then visit `http://localhost:8080` in your browser.
 
 ---
 
-## 🗂️ Project Structure
+## Project Structure
 
 ```
 mammogram-ai-diagnosis/
@@ -76,7 +70,7 @@ mammogram-ai-diagnosis/
 
 ---
 
-## 🧭 App Navigation
+## App Navigation
 
 The app has **6 pages** navigable from the top navbar:
 
@@ -121,7 +115,7 @@ Input Image (224×224 normalized)
 
 ---
 
-## 📈 Simulated Model Performance
+## Simulated Model Performance
 
 | Metric | Value |
 |---|---|
@@ -135,7 +129,7 @@ Input Image (224×224 normalized)
 
 ---
 
-## 🗃️ Dataset Reference
+## Dataset Reference
 
 The simulated model is based on the **CBIS-DDSM** (Curated Breast Imaging Subset of DDSM):
 
@@ -147,7 +141,7 @@ The simulated model is based on the **CBIS-DDSM** (Curated Breast Imaging Subset
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Category | Technology |
 |---|---|
@@ -159,7 +153,7 @@ The simulated model is based on the **CBIS-DDSM** (Curated Breast Imaging Subset
 
 ---
 
-## 🌐 Live Demo
+## Live Demo
 
 You can deploy this instantly on:
 
@@ -169,7 +163,7 @@ You can deploy this instantly on:
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions, issues, and feature requests are welcome!
 
@@ -181,7 +175,7 @@ Contributions, issues, and feature requests are welcome!
 
 ---
 
-## 📄 License
+## License
 
 Distributed under the MIT License. See [`LICENSE`](LICENSE) for more information.
 
@@ -193,11 +187,4 @@ This tool is an **educational prototype** only. It does not constitute medical a
 
 ---
 
-## 👤 Author
 
-**Your Name**  
-GitHub: [@YOUR_USERNAME](https://github.com/YOUR_USERNAME)
-
----
-
-*Built with ❤️ for academic exploration of AI in medical imaging.*
