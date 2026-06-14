@@ -1,7 +1,5 @@
 # MammoAI — Breast Cancer Detection System
 
-> ** Academic Prototype Notice:** This system is developed for **educational and research purposes only**. It has not undergone clinical trials or regulatory approval. All predictions are simulated and must **never** be used for real medical decisions.
-
 ---
 
 ## Overview
