@@ -83,7 +83,7 @@ The app has **6 pages** navigable from the top navbar:
 
 ---
 
-## 🤖 Simulated AI Pipeline
+## Simulated AI Pipeline
 
 ```
 Input Image (224×224 normalized)
