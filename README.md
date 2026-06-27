@@ -171,18 +171,5 @@ Contributions, issues, and feature requests are welcome!
 4. Push to the branch: `git push origin feature/AmazingFeature`
 5. Open a Pull Request
 
----
-
-## License
-
-Distributed under the MIT License. See [`LICENSE`](LICENSE) for more information.
-
----
-
-## ⚕️ Medical Disclaimer
-
-This tool is an **educational prototype** only. It does not constitute medical advice, diagnosis, or treatment. Always seek the guidance of a qualified healthcare provider for medical concerns. Never disregard professional medical advice or delay in seeking it because of something produced by this software.
-
----
 
 
